@@ -1,7 +1,7 @@
 {
 	"name": "generic-stream",
 	"title": "Generic Stream",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "A simple typed array and string \"streaming\" utility",
 	"author": {
 		"name": "SnaveSutit",
