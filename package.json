@@ -1,7 +1,7 @@
 {
 	"name": "generic-stream",
 	"title": "Generic Stream",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A simple typed array and string \"streaming\" utility",
 	"author": {
 		"name": "SnaveSutit",
@@ -19,10 +19,13 @@
 		"dist"
 	],
 	"scripts": {
-		"dev": "tsc -w",
-		"build": "tsc"
+		"dev": "node ./tools/esbuild.cjs --dev",
+		"build": "node ./tools/esbuild.cjs",
+		"test": "node ./dist/index.js"
 	},
 	"devDependencies": {
-		"@types/node": "^18.11.18"
+		"@types/node": "^18.11.18",
+		"esbuild": "^0.17.4",
+		"typescript": "^4.9.4"
 	}
 }
