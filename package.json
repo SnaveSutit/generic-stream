@@ -14,13 +14,13 @@
 	},
 	"type": "module",
 	"main": "dist/index.js",
-	"types": "src/index.ts",
+	"types": "types/index.ts",
 	"files": [
 		"dist"
 	],
 	"scripts": {
 		"dev": "node ./tools/esbuild.cjs --dev",
-		"build": "node ./tools/esbuild.cjs",
+		"build": "tsc && node ./tools/esbuild.cjs",
 		"test": "node ./dist/index.js"
 	},
 	"devDependencies": {

@@ -6,9 +6,8 @@
 		"module": "ES2022" /* Specify what module code is generated. */,
 
 		"declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
-		"declarationDir": "./dist/" /* Specify the output directory for generated declaration files. */,
-		"sourceMap": true /* Create source map files for emitted JavaScript files. */,
-		"outDir": "./dist/" /* Specify an output folder for all emitted files. */,
+		"declarationDir": "./types/" /* Specify the output directory for generated declaration files. */,
+		"emitDeclarationOnly": true /* Only output d.ts files and not JavaScript files. */,
 
 		"moduleResolution": "node",
 
