@@ -1,0 +1,16 @@
+{
+	"name": "generic-stream",
+	"title": "Generic Stream",
+	"version": "1.0.0",
+	"description": "A simple typed array and string \"streaming\" utility",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"dev": "tsc -w",
+		"build": "tsc"
+	},
+	"devDependencies": {
+		"@types/node": "^18.11.18"
+	}
+}
