@@ -16,7 +16,8 @@
 	"main": "dist/index.js",
 	"types": "types/index.ts",
 	"files": [
-		"dist"
+		"dist",
+		"types"
 	],
 	"scripts": {
 		"dev": "node ./tools/esbuild.cjs --dev",
