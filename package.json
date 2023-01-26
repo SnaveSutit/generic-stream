@@ -3,6 +3,15 @@
 	"title": "Generic Stream",
 	"version": "1.0.0",
 	"description": "A simple typed array and string \"streaming\" utility",
+	"author": {
+		"name": "SnaveSutit",
+		"email": "snavesutit@gmail.com",
+		"url": "https://github.com/SnaveSutit"
+	},
+	"repository": {
+		"type": "github",
+		"url": "https://github.com/SnaveSutit/generic-stream"
+	},
 	"type": "module",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
