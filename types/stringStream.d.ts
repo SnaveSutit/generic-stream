@@ -49,6 +49,10 @@ export declare class StringStream {
      */
     consume(): void;
     /**
+     * Consumes N characters in the stream
+     */
+    consumeN(n: number): void;
+    /**
      * Consumes the stream while a condition is true
      */
     consumeWhile(condition: (stream: this) => boolean): void;
@@ -57,6 +61,10 @@ export declare class StringStream {
      * @returns The consumed character
      */
     collect(): string | undefined;
+    /**
+     * Collects N characters in the stream and returns them.
+     */
+    collectN(n: number): string;
     /**
      * Consumes the stream while a condition is true and returns the consumed characters
      * @returns The consumed characters
