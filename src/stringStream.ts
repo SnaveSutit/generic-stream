@@ -72,8 +72,14 @@ export class StringStream {
 		this.itemCode = this.item?.charCodeAt(0)
 		this.index++
 		this.column++
-		if (last === '\n' || (!(last == undefined) && this.item == undefined))
-			this.addLine()
+		if (last === '\n' || (!(last == undefined) && this.item == undefined)) this.addLine()
+	}
+
+	/**
+	 * Consumes N characters in the stream
+	 */
+	consumeN(n: number): void {
+		for (let i = 0; i < n; i++) this.consume()
 	}
 
 	/**
@@ -91,6 +97,15 @@ export class StringStream {
 		const last = this.item
 		this.consume()
 		return last
+	}
+
+	/**
+	 * Collects N characters in the stream and returns them.
+	 */
+	collectN(n: number): string {
+		let items = ''
+		for (let i = 0; i < n; i++) items += this.collect()!
+		return items
 	}
 
 	/**
@@ -133,10 +148,7 @@ export class StringStream {
 	lineNumberToIndex(lineNumber: number) {
 		console.log(this.lines)
 		const line = this.lines.at(lineNumber - 1)
-		if (!line)
-			throw new Error(
-				`Tried to access line ${lineNumber} before stream reached it.`
-			)
+		if (!line) throw new Error(`Tried to access line ${lineNumber} before stream reached it.`)
 		return line.startIndex
 	}
 
