@@ -16,7 +16,7 @@ export class StringStream {
 	line: number = 1
 	column: number = 1
 	lineStart: number = 0
-	lines: ILine[] = []
+	lines: ILine[] = [{ number: 1, startIndex: 0, content: '' }]
 
 	/**
 	 * @param str An array of characters
