@@ -14,7 +14,7 @@ export class StringStream {
 	string: string
 	itemCode?: number
 	line: number = 1
-	column: number = 1
+	column: number = 0
 	lineStart: number = 0
 	lines: ILine[] = [{ number: 1, startIndex: 0, content: '' }]
 
