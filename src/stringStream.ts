@@ -1,3 +1,9 @@
+interface ILine {
+	number: number
+	startIndex: number
+	content: string
+}
+
 /**
  * A simple string stream class.
  * Useful for language parsing
@@ -7,14 +13,11 @@ export class StringStream {
 	index: number = -1
 	string: string
 	itemCode?: number
-	line: number = 0
-	column: number = 0
+	line: number = 1
+	column: number = 1
 	lineStart: number = 0
-	lines: {
-		number: number
-		startIndex: number
-		content: string
-	}[] = []
+	lines: ILine[] = []
+
 	/**
 	 * @param str An array of characters
 	 */
@@ -52,6 +55,10 @@ export class StringStream {
 		return this.string.charCodeAt(this.index + 1)
 	}
 
+	get currentLine(): ILine {
+		return this.lines[this.line - 1]
+	}
+
 	/**
 	 * Returns a slice of the stream relative to the current character
 	 *
@@ -68,11 +75,12 @@ export class StringStream {
 	 */
 	consume(): void {
 		const last = this.item
+		if (this.item) this.currentLine.content += this.item
 		this.item = this.string.at(this.index + 1)
 		this.itemCode = this.item?.charCodeAt(0)
 		this.index++
 		this.column++
-		if (last === '\n' || (!(last == undefined) && this.item == undefined)) this.addLine()
+		if (last === '\n' || (!(last == undefined) && this.item == undefined)) this.completeLine()
 	}
 
 	/**
@@ -146,21 +154,16 @@ export class StringStream {
 	 * Returns the stream index of the line specified
 	 */
 	lineNumberToIndex(lineNumber: number) {
-		console.log(this.lines)
-		const line = this.lines.at(lineNumber - 1)
-		if (!line) throw new Error(`Tried to access line ${lineNumber} before stream reached it.`)
-		return line.startIndex
+		return lineNumber - 1
 	}
 
-	private addLine(): void {
+	private completeLine(): void {
 		this.line++
-		this.lineStart = this.index
-		const i = this.seek((c) => c === '\n' || c === undefined)
+		this.column = 1
 		this.lines.push({
 			number: this.line,
-			startIndex: this.lineStart,
-			content: this.string.slice(this.lineStart, i ? i + 1 : this.length),
+			startIndex: this.index,
+			content: '',
 		})
-		this.column = 1
 	}
 }
