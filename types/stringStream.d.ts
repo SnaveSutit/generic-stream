@@ -1,3 +1,8 @@
+interface ILine {
+    number: number;
+    startIndex: number;
+    content: string;
+}
 /**
  * A simple string stream class.
  * Useful for language parsing
@@ -10,11 +15,7 @@ export declare class StringStream {
     line: number;
     column: number;
     lineStart: number;
-    lines: {
-        number: number;
-        startIndex: number;
-        content: string;
-    }[];
+    lines: ILine[];
     /**
      * @param str An array of characters
      */
@@ -36,6 +37,7 @@ export declare class StringStream {
      * Getter for the next character's charCode in the stream
      */
     get nextCode(): number | undefined;
+    get currentLine(): ILine;
     /**
      * Returns a slice of the stream relative to the current character
      *
@@ -81,5 +83,6 @@ export declare class StringStream {
      * Returns the stream index of the line specified
      */
     lineNumberToIndex(lineNumber: number): number;
-    private addLine;
+    private completeLine;
 }
+export {};
