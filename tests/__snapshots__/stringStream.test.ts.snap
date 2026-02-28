@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`stringStream > should track line and column correctly 1`] = `
+"Char: "l" Line: 1 Column: 1
+Char: "i" Line: 1 Column: 2
+Char: "n" Line: 1 Column: 3
+Char: "e" Line: 1 Column: 4
+Char: " " Line: 1 Column: 5
+Char: "1" Line: 1 Column: 6
+Char: "
+" Line: 1 Column: 7
+Char: "l" Line: 2 Column: 1
+Char: "i" Line: 2 Column: 2
+Char: "n" Line: 2 Column: 3
+Char: "e" Line: 2 Column: 4
+Char: " " Line: 2 Column: 5
+Char: "2" Line: 2 Column: 6
+Char: "
+" Line: 2 Column: 7
+Char: "l" Line: 3 Column: 1
+Char: "i" Line: 3 Column: 2
+Char: "n" Line: 3 Column: 3
+Char: "e" Line: 3 Column: 4
+Char: " " Line: 3 Column: 5
+Char: "3" Line: 3 Column: 6
+"
+`;

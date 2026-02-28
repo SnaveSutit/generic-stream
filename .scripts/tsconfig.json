@@ -2,19 +2,16 @@
 	"typeAcquisition": {
 		"enable": true
 	},
-	"include": ["./src"],
 	"compilerOptions": {
 		"outDir": "./dist/",
 		"noImplicitAny": true,
 		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "node",
+		"types": ["node"],
 		"strict": true,
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
-		"noCheck": true,
-		"emitDeclarationOnly": true,
-		"declaration": true
+		"esModuleInterop": true
 	}
 }

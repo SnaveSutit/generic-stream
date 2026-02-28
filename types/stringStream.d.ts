@@ -1,7 +1,37 @@
-interface ILine {
+interface Line {
     number: number;
     startIndex: number;
     content: string;
+}
+type StringStreamCondition = (stream: StringStream & {
+    item: string;
+}) => boolean;
+interface SyntaxPointerErrorOptions {
+    child?: Error;
+    line?: number;
+    column?: number;
+    pointerLength?: number;
+}
+/**
+ * An error that points to a specific location in a StringStream
+ *
+ * Example:
+ *```md
+ * > Unexpected '}' at 1:5
+ * > Hello, World!"}
+ * >               ↑
+ *```
+ */
+export declare class SyntaxPointerError extends Error {
+    private originalMessage;
+    stream: StringStream;
+    child?: Error;
+    line: number;
+    column: number;
+    pointerLength: number;
+    constructor(message: string, stream: StringStream, { child, line, column, pointerLength, }?: SyntaxPointerErrorOptions);
+    getOriginErrorMessage(): string;
+    updatePointerMessage(): void;
 }
 /**
  * A simple string stream class.
@@ -11,11 +41,9 @@ export declare class StringStream {
     item?: string;
     index: number;
     string: string;
-    itemCode?: number;
     line: number;
     column: number;
-    lineStart: number;
-    lines: ILine[];
+    lines: Line[];
     /**
      * @param str An array of characters
      */
@@ -33,11 +61,7 @@ export declare class StringStream {
      * Getter for the next character in the stream
      */
     get next(): string | undefined;
-    /**
-     * Getter for the next character's charCode in the stream
-     */
-    get nextCode(): number | undefined;
-    get currentLine(): ILine;
+    get currentLine(): Line;
     /**
      * Returns a slice of the stream relative to the current character
      *
@@ -45,33 +69,33 @@ export declare class StringStream {
      * @param start Where to start the slice relative to the current character
      * @param end How many characters after the start to collect. Defaults to 1
      */
-    look(start: number, end?: number): string;
+    peek(start: number, end?: number): string;
     /**
-     * Consumes the next character in the stream
+     * Consumes the current character in the stream
      */
-    consume(): void;
+    consume(): this is {
+        item: string;
+        next: string | undefined;
+    };
     /**
-     * Consumes N characters in the stream
+     * Consumes {@link count} characters in the stream
      */
-    consumeN(n: number): void;
+    consumeCount(count: number): void;
     /**
      * Consumes the stream while a condition is true
      */
-    consumeWhile(condition: (stream: this) => boolean): void;
+    consumeWhile(condition: (stream: this & {
+        item: string;
+    }) => boolean): void;
     /**
-     * Consumes the next character in the stream and returns it
-     * @returns The consumed character
+     * Collects {@link count} characters in the stream and returns them.
      */
-    collect(): string | undefined;
-    /**
-     * Collects N characters in the stream and returns them.
-     */
-    collectN(n: number): string;
+    collect(count?: number): string;
     /**
      * Consumes the stream while a condition is true and returns the consumed characters
      * @returns The consumed characters
      */
-    collectWhile(condition: (stream: this) => boolean): string;
+    collectWhile(condition: StringStreamCondition): string;
     /**
      * Returns the index of the first character to match the condition
 
@@ -83,6 +107,5 @@ export declare class StringStream {
      * Returns the stream index of the line specified
      */
     lineNumberToIndex(lineNumber: number): number;
-    private completeLine;
 }
 export {};

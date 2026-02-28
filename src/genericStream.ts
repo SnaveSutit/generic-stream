@@ -5,7 +5,7 @@
 export class GenericStream<ItemType> {
 	// TODO Check the performance of making item a getter instead
 	item?: ItemType
-	index: number = -1
+	index = -1
 	array: ItemType[]
 
 	/**
@@ -45,7 +45,7 @@ export class GenericStream<ItemType> {
 	 * @param start Where to start the slice relative to the current item
 	 * @param end How many characters after the start to collect. Defaults to 1
 	 */
-	look(start: number, end: number = 1): ItemType[] {
+	look(start: number, end = 1): ItemType[] {
 		return this.array.slice(this.index + start, this.index + start + end)
 	}
 
@@ -93,7 +93,7 @@ export class GenericStream<ItemType> {
 	 */
 	seek(
 		comparison: ItemType | ((c?: string) => boolean),
-		maxDistance: number = Infinity
+		maxDistance = Infinity
 	): number | undefined {
 		maxDistance = Math.min(this.index + maxDistance, this.length)
 		if (typeof comparison === 'function') {
