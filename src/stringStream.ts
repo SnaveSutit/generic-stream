@@ -1,233 +1,177 @@
 interface Line {
 	number: number
 	startIndex: number
+	endIndex: number
 	content: string
 }
 
-type StringStreamCondition = (stream: StringStream & { item: string }) => boolean
-
-interface SyntaxPointerErrorOptions {
-	child?: Error
-	line?: number
-	column?: number
-	pointerLength?: number
-}
-/**
- * An error that points to a specific location in a StringStream
- *
- * Example:
- *```md
- * > Unexpected '}' at 1:5
- * > Hello, World!"}
- * >               ↑
- *```
- */
-export class SyntaxPointerError extends Error {
-	private originalMessage: string
-
-	stream: StringStream
-	child?: Error
+export interface StreamPosition {
+	/** The first line is index 1. */
 	line: number
+	/** The first column is index 1. */
 	column: number
-	pointerLength: number
-
-	constructor(
-		message: string,
-		stream: StringStream,
-		{
-			child,
-			line = stream.line,
-			column = stream.column,
-			pointerLength = 1,
-		}: SyntaxPointerErrorOptions = {}
-	) {
-		super(message)
-		this.name = 'SyntaxPointerError'
-		this.stream = stream
-		this.child = child
-		this.line = line
-		this.column = column
-		this.pointerLength = pointerLength
-
-		this.originalMessage = message
-
-		if (this.child) {
-			this.message = `${this.message} at ${this.line}:${this.column}\n${this.child.message}`
-			return
-		}
-
-		this.updatePointerMessage()
-	}
-
-	getOriginErrorMessage(): string {
-		if (this.child) {
-			if (this.child instanceof SyntaxPointerError) {
-				return this.child.getOriginErrorMessage()
-			}
-			return this.child.message
-		}
-		return this.message
-	}
-
-	updatePointerMessage() {
-		const startOfLine = this.stream.lines[this.line - 1].startIndex
-		const endOfLine = this.stream.seek('\n')
-
-		const lineString = this.stream.string.slice(startOfLine, endOfLine).trimEnd()
-
-		// Get column where tabs count as 4 characters
-		const actualColumn = lineString.slice(0, this.column - 1).replace(/\t/g, '    ').length + 1
-
-		const pointer = ' '.repeat(actualColumn - 1) + '↑'.repeat(this.pointerLength)
-		this.message = `${this.originalMessage} at ${this.line}:${this.column}\n${lineString}\n${pointer}`
-	}
 }
 
-/**
- * A simple string stream class.
- * Useful for language parsing
- */
+const enum CHARS {
+	NEWLINE = 10,
+}
+
 export class StringStream {
-	item?: string
-	index = 0
-	string: string
+	protected _lines?: Line[]
+	protected buffer: Buffer
+
+	cursor = 0
 	line = 1
 	column = 1
-	lines: Line[] = []
+
+	indexOf: Buffer['indexOf']
+	slice: (start?: number, end?: number) => string
 
 	/**
-	 * @param str An array of characters
+	 * @param str An array of characters.
 	 */
 	constructor(str: string) {
-		this.string = str.replace('\r', '')
+		this.buffer = Buffer.from(str.replace(/\r/, ``))
+		this.indexOf = this.buffer.indexOf.bind(this.buffer)
+		this.slice = this.buffer.toString.bind(this.buffer, `utf-8`)
+	}
 
-		const lines = this.string.split('\n')
-		let startIndex = 0
-		for (let i = 0; i < lines.length; i++) {
-			const content = lines[i]
-			this.lines.push({ number: i + 1, startIndex, content })
-			startIndex += content.length + 1
+	get lines(): Line[] {
+		if (!this._lines) {
+			this._lines = []
+			const lines = this.buffer.toString().split(`\n`)
+			let startIndex = 0
+			for (let i = 0; i < lines.length; i++) {
+				this._lines.push({
+					number: i + 1,
+					startIndex,
+					endIndex: startIndex + lines[i].length,
+					content: `${lines[i]}\n`,
+				})
+				startIndex += lines[i].length + 1 // +1 for the newline character.
+			}
 		}
-	}
-
-	/**
-	 * @returns The length of the stream
-	 */
-	get length(): number {
-		return this.string.length
-	}
-
-	/**
-	 * Returns the progress of the stream
-	 * @returns A number from 0 to 1
-	 */
-	get progress(): number {
-		return Math.min(this.index / this.length, 1)
-	}
-
-	/**
-	 * Getter for the next character in the stream
-	 */
-	get next(): string | undefined {
-		return this.string.at(this.index + 1)
+		return this._lines
 	}
 
 	get currentLine(): Line {
 		return this.lines[this.line - 1]
 	}
 
-	/**
-	 * Returns a slice of the stream relative to the current character
-	 *
-	 * Non-consuming
-	 * @param start Where to start the slice relative to the current character
-	 * @param end How many characters after the start to collect. Defaults to 1
-	 */
-	peek(start: number, end = 1): string {
-		return this.string.slice(this.index + start, this.index + start + end)
+	get length(): number {
+		return this.buffer.length
+	}
+
+	getPosition(): StreamPosition {
+		return { line: this.line, column: this.column }
 	}
 
 	/**
-	 * Consumes the current character in the stream
+	 * The progress of the stream from 0 to 1.
 	 */
-	consume(): this is { item: string; next: string | undefined } {
-		if (this.item === '\n') {
+	get progress(): number {
+		return Math.min(this.cursor / this.length, 1)
+	}
+
+	/**
+	 * The previous char code in the stream.
+	 */
+	get previous(): number | undefined {
+		return this.buffer[this.cursor - 1]
+	}
+
+	/**
+	 * The current char code in the stream.
+	 */
+	get item(): number {
+		return this.buffer[this.cursor]
+	}
+
+	/**
+	 * The next char code in the stream.
+	 */
+	get next(): number | undefined {
+		return this.buffer[this.cursor + 1]
+	}
+
+	/**
+	 * Returns the char code at the specified {@link index}.
+	 */
+	at(index: number): number | undefined {
+		return this.buffer[index]
+	}
+
+	/**
+	 * Checks if the next char codes match the specified string.
+	 */
+	match(str: string) {
+		return this.buffer.indexOf(str, this.cursor) === this.cursor
+	}
+
+	/**
+	 * Advances the stream by one character.
+	 */
+	advance() {
+		if (this.cursor >= this.length) {
+			throw new Error(`Cannot advance past the end of the stream`)
+		} else if (this.buffer[this.cursor] === CHARS.NEWLINE) {
+			this.cursor++
 			this.line++
-			this.column = 0
+			this.column = 1
+		} else {
+			this.cursor++
+			this.column++
 		}
-		this.item = this.string.at(this.index + 1)
-		this.index++
-		this.column++
-		return true
 	}
 
-	/**
-	 * Consumes {@link count} characters in the stream
-	 */
-	consumeCount(count: number): void {
-		for (let i = 0; i < count; i++) this.consume()
-	}
-
-	/**
-	 * Consumes the stream while a condition is true
-	 */
-	consumeWhile(condition: (stream: this & { item: string }) => boolean): void {
-		while (this.item && condition(this as any)) this.consume()
-	}
-
-	/**
-	 * Collects {@link count} characters in the stream and returns them.
-	 */
-	collect(count = 1): string {
-		let items = ''
-		let i = 0
-		while (this.item && i < count) {
-			items += this.item
-			this.consume()
-			i++
+	advanceUntil(charCode: number) {
+		while (this.cursor < this.length && this.buffer[this.cursor] !== charCode) {
+			if (this.buffer[this.cursor] === CHARS.NEWLINE) {
+				this.cursor++
+				this.line++
+				this.column = 1
+			} else {
+				this.cursor++
+				this.column++
+			}
 		}
-		return items
 	}
 
 	/**
-	 * Consumes the stream while a condition is true and returns the consumed characters
-	 * @returns The consumed characters
+	 * Returns the next {@link count} char codes as a string.
+	 *
+	 * Does not advance.
 	 */
-	collectWhile(condition: StringStreamCondition): string {
-		let items = ''
-		while (this.item && condition(this as any)) {
-			items += this.item
-			this.consume()
-		}
-		return items
+	peek(count: number): string {
+		return this.buffer.toString(`utf-8`, this.cursor, this.cursor + count)
 	}
 
 	/**
-	 * Returns the index of the first character to match the condition
-
-	 * Does not consume
-	 * @returns The index of the character or undefined if no character is found.
+	 * Returns the index of the first char code to match the condition.
+	 *
+	 * Does not advance.
+	 * @returns The index of the char code or undefined if no char code is found.
 	 */
 	seek(
-		comparison: string | ((c?: string) => boolean),
+		comparison: number | ((c?: number) => boolean),
 		maxDistance = Infinity
 	): number | undefined {
-		maxDistance = Math.min(this.index + maxDistance, this.length)
-		if (typeof comparison === 'function') {
-			for (let i = this.index; i < maxDistance; i++) {
-				const c = this.string.at(i)
+		maxDistance = Math.min(this.cursor + maxDistance, this.length)
+		if (typeof comparison === `function`) {
+			for (let i = this.cursor; i < maxDistance; i++) {
+				const c = this.buffer[i]
 				if (comparison(c)) return i
 			}
 		} else {
-			for (let i = this.index; i < maxDistance; i++) {
-				const c = this.string.at(i)
+			for (let i = this.cursor; i < maxDistance; i++) {
+				const c = this.buffer[i]
 				if (c === comparison) return i
 			}
 		}
 	}
 
 	/**
-	 * Returns the stream index of the line specified
+	 * Returns the stream index of the line specified, or -1 if the line number is out of range.
 	 */
 	lineNumberToIndex(lineNumber: number) {
 		return this.lines[lineNumber - 1]?.startIndex ?? -1
