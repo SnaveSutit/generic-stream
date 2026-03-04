@@ -2,7 +2,7 @@
 	"name": "generic-stream",
 	"title": "Generic Stream",
 	"version": "2.0.0",
-	"description": "A simple typed array and string \"streaming\" utility",
+	"description": "A simple but fast typed array and string \"streaming\" utility",
 	"author": {
 		"name": "SnaveSutit",
 		"email": "snavesutit@gmail.com",
@@ -12,17 +12,14 @@
 		"type": "github",
 		"url": "https://github.com/SnaveSutit/generic-stream"
 	},
-	"type": "module",
 	"main": "dist/index.js",
-	"types": "types/index.d.ts",
+	"types": "dist/index.d.ts",
 	"files": [
-		"dist",
-		"types"
+		"dist"
 	],
 	"scripts": {
-		"dev": "tsx .scripts/esbuild.ts --dev",
-		"build": "tsc && tsx .scripts/esbuild.ts",
-		"test": "vitest"
+		"dev": "tsc --watch",
+		"build": "tsc"
 	},
 	"devDependencies": {
 		"@types/node": "^24.9.2",
@@ -36,7 +33,7 @@
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.46.2",
-		"vitest": "^4.0.4"
-	},
-	"packageManager": "yarn@4.10.3"
+		"vitest": "^4.0.4",
+		"@types/bun": "latest"
+	}
 }
