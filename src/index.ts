@@ -1,2 +1,2 @@
-export { GenericStream } from './genericStream'
-export { StringStream } from './stringStream'
+export * from './genericStream'
+export * from './stringStream'
